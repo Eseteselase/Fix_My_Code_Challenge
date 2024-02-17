@@ -54,9 +54,11 @@ class User():
         """
         if pwd is None or not isinstance(pwd, str) or self.__password is None:
             return False
-        salt, hashed_password = self.__password.split('$')
-        return hashed_password == hashlib.sha256((salt + pwd).encode()).hexdigest().upper()
-
+        try:
+            salt, hashed_password = self.__password.split('$')
+        except ValueError:
+            return False
+        return hashed_password == hashlib.sha256((salt + str(pwd)).encode()).hexdigest().upper()
 
 if __name__ == '__main__':
     print("Test User")
