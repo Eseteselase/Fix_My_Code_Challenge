@@ -37,10 +37,12 @@ class User():
         - `None` if `pwd` is not a string
         - Hash `pwd` in MD5 before assign to `__password`
         """
-        if pwd is None or type(pwd) is not str:
+        if pwd is None or not isinstance(pwd, str):
             self.__password = None
         else:
-            self.__password = hashlib.md5(pwd.encode()).hexdigest().upper()
+            salt = uuid.uuid4().hex
+            hashed_password = hashlib.sha256((salt + pwd).encode()).hexdigest().upper()
+            self.__password = f"{salt}${hashed_password}"
 
     def is_valid_password(self, pwd):
         """
@@ -50,11 +52,10 @@ class User():
         - `False` if `__password` is `None`
         - Compare `__password` and the MD5 value of `pwd`
         """
-        if pwd is None or type(pwd) is not str:
+        if pwd is None or not isinstance(pwd, str) or self.__password is None:
             return False
-        if self.__password is None:
-            return False
-        return hashlib.md5(pwd.encode()).hexdigest().upper() == self.__password
+        salt, hashed_password = self.__password.split('$')
+        return hashed_password == hashlib.sha256((salt + pwd).encode()).hexdigest().upper()
 
 
 if __name__ == '__main__':
